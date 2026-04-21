@@ -1,52 +1,6 @@
 import { Children, use, useEffect, useState } from "react";
 import StarRating from "./StarRating";
 import StarRatingM from "./StarRatingM";
-const tempMovieData = [
-  {
-    imdbID: "tt1375666",
-    Title: "Inception",
-    Year: "2010",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
-  },
-  {
-    imdbID: "tt0133093",
-    Title: "The Matrix",
-    Year: "1999",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
-  },
-  {
-    imdbID: "tt6751668",
-    Title: "Parasite",
-    Year: "2019",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_SX300.jpg",
-  },
-];
-
-const tempWatchedData = [
-  {
-    imdbID: "tt1375666",
-    Title: "Inception",
-    Year: "2010",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
-    runtime: 148,
-    imdbRating: 8.8,
-    userRating: 10,
-  },
-  {
-    imdbID: "tt0088763",
-    Title: "Back to the Future",
-    Year: "1985",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BZmU0M2Y1OGUtZjIxNi00ZjBkLTg1MjgtOWIyNThiZWIwYjRiXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg",
-    runtime: 116,
-    imdbRating: 8.5,
-    userRating: 9,
-  },
-];
 
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
@@ -55,29 +9,15 @@ const KEY = "f84fc31d";
 export default function App() {
   // const [query, setQuery] = useState("inception");
   const [query, setQuery] = useState("");
-
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
   const [isloading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState(null);
-
-  // const query = "intersteellar"; // we can use the query state to search for movies
-  // const tempQuery = "interstellar";
-  /* 
-  useEffect(function () {
-    console.log("After initaial render ");
-  }, []);
-  useEffect(function () {
-    console.log("After every render ");
-  });
-  console.log("During render");
-  useEffect(
-    function () {
-      console.log("After every render when query changes");
-    },
-    [query]
-  ); // this effect runs only when query changes */
+ 
+  const [watched ,setWatched]=useState([])
+  // function should to be fo fo cacal storage 
+  const storeValue=localStorage.getItem('watched')
+  // for to run
 
   function handleDeletedWatched(id) {
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
@@ -89,10 +29,46 @@ export default function App() {
     setSelectedId(null); // this function is used to close the movie details when the user clicks on the close button
   }
 
+  
   function handleAddWatched(movie) {
+    // 1 store in to the local storage  each time the movie is added
+    // added the new movie in to the watch list
+    // added the newwatch list in to the local storage
+    // do it by effect
     setWatched((watched) => [...watched, movie]); // this function is}
-  }
 
+    // update version is worked an async way
+    // watched is the old version the reasone of the async way not the new way
+    // so the watched is the old not added the new movie  before the new movie is added
+    // localStorage.setItem('watched',watched)
+
+    //  we can only store on key value  pairs the value key is string
+
+    // localStorage.setItem("watched", ([...watched, movie])); for to convert to string beacue in the browser we store in string way
+    // localStorage.setItem("watched", JSON.stringify([...watched, movie]));
+    // instead of   the handlefunction
+    // we can store inside the effect  beacue we want to store the data to local storage to reusable
+  // }
+  // new function for to add data in to the local storage to run the  effect  each time to watched movie is updated
+// in local storage we only store key value pairs 
+
+  useEffect(
+    function () {
+      localStorage.setItem("watched", JSON.stringify(watched));
+    },
+    [watched]
+  );
+
+
+
+  //  2 second part we want to read this data back tin to the application 
+   
+
+  // we want this data back in to the application 
+    
+
+
+  // this component render when the component was first mount 
   useEffect(
     function () {
       const controller = new AbortController(); // create a new AbortController to cancel the fetch request if the component unmounts ,that is the browser api // like the
@@ -141,13 +117,7 @@ export default function App() {
       };
     },
     [query]
-  ); // we pass the query as a dependency to the useEffect hook so that it runs when the query changes
-  // empty dependency array means this effect runs once when the component mounts
-
-  //   fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=interstellar`)
-  //     .then((res) => res.json())
-  //     .then((data) => setMovies(data.Search)); //so it is infinit loop beacue of  we use the usetate in event handler
-
+  );
   return (
     <>
       <NavBar>
@@ -155,16 +125,6 @@ export default function App() {
         <Numresults movies={movies} />
       </NavBar>
       <Main>
-        {/* <Box element={<MovieList movies={movies} />} />
-        <Box
-          element={
-            <>
-              <WhachedSummary watched={watched} />
-              <WatchedMoviesList watched={watched} />
-            </>
-          }
-        /> */}
-        {/* <Box>{isloading ? <Loader /> : <MovieList movies={movies} />}</Box> */}
         <Box>
           {isloading && <Loader />}
           {!isloading && !error && (
@@ -255,27 +215,6 @@ function Box({ children }) {
   );
 }
 
-// function WatchedBox() {
-//   const [watched, setWatched] = useState(tempWatchedData);
-//   const [isOpen, setIsOpen] = useState(true);
-
-//   return (
-//     <div className="box">
-//       <button
-//         className="btn-toggle"
-//         onClick={() => setIsOpen((open) => !open)}
-//       >
-//         {isOpen ? "–" : "+"}
-//       </button>
-//       {isOpen && (
-//         <>
-//           <WhachedSummary watched={watched} />
-//           <WatchedMoviesList watched={watched} />
-//         </>
-//       )}
-//     </div>
-//   );
-// }
 function MovieList({ movies, onSelectMovie }) {
   return (
     <ul className="list list-movies">
@@ -322,6 +261,32 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
     Director: director,
     Genre: genre,
   } = movie;
+  // /*eslint-disable */ for to disble eslint to not detect the error
+
+  // if (userRating > 8) {
+  //   [isTop, setIsTop] = useState(true);
+  // }
+
+  // if(imdbRating>8) return <p> Greatest ever</p>
+
+  // if(imdbRating>8) [isTop,setIsTop]=useState(true); but the first render it is not defaine
+  // console.log(isTop);
+
+  // const [isTop,setIsTop]=useState(imdbRating>8);//undefine
+  // console.log(isTop);
+
+  //for to prevent this problem
+  // but instead of the useEffect shoule easy way derived state
+  /* const [isTop,setIsTop]=useState(imdbRating>8);
+console.log(isTop);
+useEffect (function(){
+  setIsTop(imdbRating>0);
+},[imdbRating]); */
+
+  // const isTop = imdbRating > 8;
+  // console.log(isTop);
+  // const [avgRating, setAvgRating] = useState(0);
+
   function handleAdd() {
     const newWatchedMovie = {
       imdbID: selectedId,
@@ -332,8 +297,13 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
       imdbRating: Number(imdbRating),
       userRating, // default user rating
     };
+
     onAddWatched(newWatchedMovie); // call the function passed from App component to add the movie to watched list
     onCloseMovie(); // close the movie details after adding it to watched list
+
+    // setAvgRating(Number(imdbRating));
+    // setAvgRating((avgRating) => (avgRating + userRating) / 2); //  that calculate the previous value
+    // setAvgRating((avgRating + userRating) / 2);// but that derectly calculate not the previous value
   }
 
   useEffect(
@@ -353,7 +323,6 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
 
     [onCloseMovie]
   );
-
   useEffect(
     function () {
       async function getMovieDetails() {
@@ -365,6 +334,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
         //
         const data = await res.json();
         setMovie(data);
+
         setIsLoading(false);
 
         // console.log(data);
@@ -372,10 +342,8 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
       // if the selected movie is already in the watched list, we don't need to fetch it again
       getMovieDetails();
     },
-
     [selectedId]
   );
-
   useEffect(
     function () {
       if (!title) return; // if title is not available, we don't need to set the document title
@@ -411,6 +379,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
               </p>
             </div>
           </header>
+          {/* <p>{avgRating}</p> */}
           <section>
             <div className="rating">
               {" "}
@@ -447,14 +416,6 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   );
 }
 function WhachedSummary({ watched }) {
-  // const avgImdbRating = average(
-  //   watched.map((movie) => movie.imdbRating)
-  // ).tofixed(2);
-  // const avgUserRating = average(
-  //   watched.map((movie) => movie.userRating)
-  // ).tofixed(2);
-  // const avgRuntime = average(watched.map((movie) => movie.runtime)).tofixed(2);
-
   const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
   const avgUserRating = average(watched.map((movie) => movie.userRating));
   const avgRuntime = average(watched.map((movie) => movie.runtime));

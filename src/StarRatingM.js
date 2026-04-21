@@ -1,5 +1,4 @@
 import { useState } from "react";
-import PropTypes from "prop-types";
 const containerStyle = {
   display: "flex",
   alignItems: "center",
@@ -9,15 +8,6 @@ const startContainerStyle = {
   display: "flex",
 };
 // use the low case p rotypes
-// StarRating.propTypes = {
-//   maxRating: PropTypes.number.isRequired,
-//   defaultRating: PropTypes.number,
-//   color: PropTypes.string,
-//   size: PropTypes.number,
-//   className: PropTypes.string,
-//   message: PropTypes.array,
-//   onSetRating: PropTypes.func,
-// };
 export default function StarRatingM({
   maxRating = 5,
   color = "#fcc419",

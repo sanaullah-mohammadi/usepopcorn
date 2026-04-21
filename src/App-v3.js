@@ -1,10 +1,10 @@
-import { Children, use, useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import StarRating from "./StarRating";
-import StarRatingM from "./StarRatingM";
+
 import { useMovies } from "./useMovies";
 import { useLocalStorageState } from "./useLocalStorageState";
 import { useKey } from "./useKey";
-const tempMovieData = [
+/* const tempMovieData = [
   {
     imdbID: "tt1375666",
     Title: "Inception",
@@ -26,8 +26,8 @@ const tempMovieData = [
     Poster:
       "https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_SX300.jpg",
   },
-];
-
+]; */
+/* 
 const tempWatchedData = [
   {
     imdbID: "tt1375666",
@@ -49,7 +49,7 @@ const tempWatchedData = [
     imdbRating: 8.5,
     userRating: 9,
   },
-];
+]; */
 
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
@@ -342,10 +342,22 @@ function MovieList({ movies, onSelectMovie }) {
   );
 }
 function Movie({ movie, onSelectMovie }) {
+  const [imgSrc, setImgSrc] = useState(
+    movie.Poster !== "N/A" ? movie.Poster : null,
+  );
+
   return (
     <li onClick={() => onSelectMovie(movie.imdbID)}>
       {/* we use the handleSelectMovie function to select a movie when it is clicked */}
-      <img src={movie.Poster} alt={`${movie.Title} poster`} />
+      {imgSrc ? (
+        <img
+          src={imgSrc}
+          alt={`${movie.Title} poster`}
+          onError={() => setImgSrc(null)}
+        />
+      ) : (
+        <div className="no-poster">No Poster</div>
+      )}
       <h3>{movie.Title}</h3>
       <div>
         <p>
@@ -361,9 +373,10 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   const [movie, setMovie] = useState({});
   const [isloading, setIsLoading] = useState(false);
   const [userRating, setUserRating] = useState("");
+  const [posterSrc, setPosterSrc] = useState(null);
   const isWatched = watched.map((movie) => movie.imdbID).includes(selectedId); // check if the movie is already in the watched list
   const watchedUserrating = watched.find(
-    (movie) => movie.imdbID === selectedId
+    (movie) => movie.imdbID === selectedId,
   )?.userRating; // get the
   //  you are not allowed to mutate the ref in render logic
 
@@ -376,7 +389,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
         countRef.current += 1;
       }
     },
-    [userRating]
+    [userRating],
   );
 
   const {
@@ -462,11 +475,12 @@ useEffect (function(){
         setIsLoading(true);
         // in order to connect the abort function to the fetch request, we need to pass the signal property of the controller to the fetch request
         const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${KEY}&i=${selectedId}`
+          `http://www.omdbapi.com/?apikey=${KEY}&i=${selectedId}`,
         );
         //
         const data = await res.json();
         setMovie(data);
+        setPosterSrc(data.Poster !== "N/A" ? data.Poster : null);
         setIsLoading(false);
 
         // console.log(data);
@@ -475,7 +489,7 @@ useEffect (function(){
       getMovieDetails();
     },
 
-    [selectedId]
+    [selectedId],
   );
 
   useEffect(
@@ -484,7 +498,7 @@ useEffect (function(){
       document.title = `Movie | ${title}`;
       // console.log(`clean up effect for movie ${title}`);
     },
-    [title]
+    [title],
   );
   return (
     <div className="details">
@@ -497,7 +511,15 @@ useEffect (function(){
             <button className="btn-back" onClick={onCloseMovie}>
               &larr;
             </button>
-            <img src={poster} alt={`poster of ${movie} movie`} />
+            {posterSrc ? (
+              <img
+                src={posterSrc}
+                alt={`poster of ${movie} movie`}
+                onError={() => setPosterSrc(null)}
+              />
+            ) : (
+              <div className="no-poster">No Poster</div>
+            )}
             <div className="details-overview">
               <h2>{title}</h2>
               <p>
@@ -532,7 +554,8 @@ useEffect (function(){
                 </>
               ) : (
                 <p>
-                  You rated this movie : {watchedUserrating} <span>⭐</span>{" "}
+                  You rated this movie : {watchedUserrating}{" "}
+                  <span>⭐</span>{" "}
                 </p>
               )}
             </div>
@@ -602,12 +625,24 @@ function WatchedMoviesList({ watched, onDeleteWatched }) {
 }
 
 function WatchedMovie({ movie, onDeleteWatched }) {
+  const [posterSrc, setPosterSrc] = useState(
+    movie.poster !== "N/A" ? movie.poster : null,
+  );
+
   function handleDelete() {
     onDeleteWatched(movie.imdbID); // call the function passed from WatchedMoviesList to delete the movie from watched list
   }
   return (
     <li>
-      <img src={movie.poster} alt={`${movie.title} poster`} />
+      {posterSrc ? (
+        <img
+          src={posterSrc}
+          alt={`${movie.title} poster`}
+          onError={() => setPosterSrc(null)}
+        />
+      ) : (
+        <div className="no-poster">No Poster</div>
+      )}
       <h3>{movie.title}</h3>
       <div>
         <p>
